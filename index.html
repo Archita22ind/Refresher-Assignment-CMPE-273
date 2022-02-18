@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html style="font-family: cursive; background-image:  url('background.jpeg') ;
+ background-repeat: no-repeat ; background-size: 100% ; font-size: 16px; font-weight: bold;">
+  <body>
+    <div style="text-align: center">
+      <h1 style="font-style: italic; font-size: 40px; color: #020146">
+        MY TRAVEL DIARY
+      </h1>
+      <div style="width: 50%; height: 100px; float: left; text-align: center">
+        <br>
+        <button
+        style=" text-align: center;
+        font-family: cursive;
+        font-size: 20px ;padding: 5px;
+        width: 200px ; cursor: pointer;
+        border: 4px  #6c7ddf"
+        id="buttonID"
+        onclick="findLatitudeLongitude()">
+        Where Am I??
+      </button>
+      <h3 id="currentLocation"></h3>
+      <p
+        id="map"
+        style="
+          text-align: center;
+          width: 400px;
+          margin-left: 20%;
+          height: 300px;
+          border-width: 5%;
+          padding: 8px;
+          background-image: url('default_map_mobile.jpeg');
+          border: 2px solid rgb(61, 61, 61);"
+      ></p>
+
+      <form onsubmit="storeFeedback()" autocomplete="off">
+        Please share your feedback  
+        <input
+          id="feedbackInput"
+          name="feedbackInput"
+          style="width: 300px; height: 50px">
+      </input>
+        <br />
+          Name *<input id="name" type="text" name="Name" required> </input>
+        <br />
+          Email *<input type="email" id="email" name="email" required
+        placeholder="user@gmail.com"
+        pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"/> </input>
+        
+        <button id="button" name="submit" >
+          Submit
+        </button>
+       </form>
+
+      </div>
+
+      <div style="width: 50%; height: 100px; float: right; text-align: center" >
+      <h2>Places Visited</h2>
+      <form onSubmit= "storeTravelHistory()" autocomplete="off">
+        <label>Place Name *</label>
+        <input
+          type="text"
+          id="placename"
+          name="placename"
+          placeholder="Place Name"
+          required
+          pattern="^[A-Za-z -]+$"
+          oninvalid="alert('Please Only enter alphabets!')"
+          autofocus
+        />
+        <label>Date Visited *</label>
+        <input
+          type="date"
+          id="datevisited"
+          name="datevisited"
+          placeholder="date"
+          required
+        />
+        <button id="button" name="submit" >
+          Save
+        </button>
+      </form>
+    </br>
+      <div>
+        <button id="show" name="show" onclick="showTravelHistory()">
+          Show my travel history
+        </button>
+        <button id="delete" name="delete" onclick="deleteTravelRecords()">
+          Delete all travel history
+        </button>
+      </div>
+
+      <form onSubmit= "storeFutureData()" autocomplete="off">
+        <h2>My Travel Planner</h2>
+        <p>Places yet to visit</p>
+        <label>Place Name *</label>
+        <input
+          type="text"
+          id="placename2"
+          name="placename2"
+          placeholder="Place Name"
+          required
+          pattern="^[A-Za-z -]+$"
+          oninvalid="alert('Please Only enter alphabets!')"
+        />
+        <label>Plan Date</label>
+        <input
+          type="date"
+          id="datevisited2"
+          name="datevisited2"
+          placeholder="date"
+        />
+
+        <button id="button2" name="submit" >
+          Save
+        </button>
+      </form>
+    </br>
+        <button id="show" name="show" onclick="showFuturePlans()">
+          Show my plans!!
+        </button>
+     
+
+      <p id="list" style="background-color: #edf1d1"></p>
+    </div>
+    <script src="https://maps.google.com/maps/api/js?key=AIzaSyC1Mrbcn5DtUYKuZ5mq7Z6-Lgo8pTfV8Jk"></script>
+    <script type="text/javascript">
+
+    //getting thr latitude and longitude form HTML geolocation
+      const findLatitudeLongitude = () => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            showLocation,
+            getErrorCode
+          );
+        } else {
+          document.getElementById("currentLocation").innerHTML = 
+          "Sorry! location cannot be fetched.";
+        }
+      };
+
+     //passing the coordinates to the google maps api 
+      const showLocation = (position) => {
+        let latitudeLongitude = new google.maps.LatLng(
+          position.coords.latitude,
+          position.coords.longitude
+        );
+
+     // google maps specifications passed
+        let googleMap = new google.maps.Map(
+          document.getElementById("map"),
+          {
+          center: latitudeLongitude,
+          zoom: 8,
+          mapTypeControl: true,
+        });
+        
+        new google.maps.Marker({
+          position: latitudeLongitude,
+          map: googleMap,
+        });
+       
+      };
+
+     // error codes incase the current position is not being fetched. 
+      function getErrorCode(err) {
+        if(err.code === err.PERMISSION_DENIED  )
+            alert("Permission denied for Geolocation request.");
+        else if(err.code === err.POSITION_UNAVAILABLE )
+            alert("Location information is not available.");
+        else if (err.code === err.UNKNOWN_ERROR)
+            alert("Unknown error.");
+      };
+
+      const storeTravelHistory = () => {
+        localStorage.setItem(
+          document.getElementById("placename").value,
+          document.getElementById("datevisited").value
+        );
+        document.getElementById("placename").value = "";
+        document.getElementById("datevisited").value = "";
+      };
+
+      const showTravelHistory = () => {
+        let list =
+          "<h1>My Past Trips!!</h1><table align='center' ><tr><th width=150>Place<b></th><th width=150>Date Visited</th></tr>";
+        for (let i = 0; i < localStorage.length; i++) {
+          let key = localStorage.key(i);
+          let value = localStorage[key];
+          if(key !== 'Feedback_Details')
+            { list +=
+            "<tr><td width=50>" +
+            key +
+            "</td><td width=50>" +
+            value +
+            "</td></tr>";
+            }
+        }
+        list += "</table>";
+        document.getElementById("list").innerHTML = list;
+      };
+
+      const deleteTravelRecords = () => {
+        localStorage.clear();
+        document.getElementById("list").innerHTML = "";
+      };
+
+      const storeFutureData = () => {
+        sessionStorage.setItem(
+          document.getElementById("placename2").value,
+          document.getElementById("datevisited2").value
+        );
+        document.getElementById("placename2").value = "";
+        document.getElementById("datevisited2").value = "";
+      };
+
+      const showFuturePlans = () => {
+        let list =
+          "<h1>My Planned Trips!!</h1><table align='center'><tr><th width=150>Place<b></th><th width=150>Date Planned</th></tr>";
+
+        for (let i = 0; i < sessionStorage.length; i++) {
+          let key = sessionStorage.key(i);
+          let value = sessionStorage[key];
+          list +=
+            "<tr><td width=50>" +
+            key +
+            "</td><td width=50>" +
+            value +
+            "</td></tr>";
+        }
+        list += "</table>";
+        document.getElementById("list").innerHTML = list;
+      };
+
+      const storeFeedback =() =>{
+       let feedbackdetails ={
+        name : document.getElementById("name").value,
+        email : document.getElementById("email").value,
+        feedback : document.getElementById("feedbackInput").value,
+       }
+        localStorage.setItem("Feedback_Details" ,  JSON.stringify(feedbackdetails));
+      };
+
+    </script>
+  </body>
+</html>
